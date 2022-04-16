@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Flask JWT extended - Login&Register</title>
+</head>
+<body>
+    {% if request.cookies.get("access_token_cookie")  %}
+        <a href="/logout_with_cookies">Logout</a>
+
+    {% else %}
+        <h1>Register</h1>
+        <form action='/register' method='POST'>
+            <input type='text' name='username' placeholder='username' required><br>
+            <input type='password' name='password' placeholder='password' required><br>
+            <input type="submit" value="Submit">
+        </form>
+    {% endif %}
+</body>
+</html>
