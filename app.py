@@ -15,7 +15,13 @@ from flask_sqlalchemy import SQLAlchemy
 
 import os
 
+from sqlalchemy import false
+# Hash the password
+from flask_bcrypt import Bcrypt
+
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
+
 
 # Setup DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'sqlite.db')
@@ -42,7 +48,7 @@ jwt = JWTManager(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userName = db.Column(db.String(50),nullable=False,unique=True)
-    passWord = db.Column(db.String(300),nullable=False,unique=False)
+    passWord = db.Column(db.String(1000),nullable=False,unique=False)
 
 
 # create DB
@@ -66,10 +72,14 @@ def login_with_cookies():
         
         user = User.query.filter_by(userName=user_name).first()
 
-        
+        # Hash Password by flask_bcrypt
+        pw_hash = bcrypt.generate_password_hash(pass_word)
+
+
         if user is None:
             return jsonify({"error": "Unauthorized, no such user"}), 401, {"Refresh": "1; url=/login_with_cookies"}
-        elif pass_word != user.passWord:
+        # Bcrypt check database password (the password in database is hashed)
+        elif bcrypt.check_password_hash(pw_hash, user.passWord) is false:
             return jsonify({"error": "Incorrect Password"}), 401, {"Refresh": "1; url=/login_with_cookies"}
 
         else:
@@ -113,8 +123,12 @@ def register():
         pass_word = request.form["password"]
         user = User.query.filter_by(userName=user_name).first()
 
+        # Hash Password by flask_bcrypt,  Database should not store original password(non-hashed password)
+        pw_hash = bcrypt.generate_password_hash(pass_word)
+
+
         if user is None:
-            registerAdd = User(userName=user_name, passWord=pass_word)
+            registerAdd = User(userName=user_name, passWord=pw_hash)
 
             db.session.add(registerAdd)
             db.session.commit()

@@ -1,3 +1,7 @@
+# Demo:
+
+https://flask-jwt-extended.herokuapp.com/login_with_cookies
+
 # Usage:
 
 ## sample_template
